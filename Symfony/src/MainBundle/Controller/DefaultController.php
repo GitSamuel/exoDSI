@@ -3,6 +3,7 @@
 namespace MainBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use MainBundle\Entity\Email;
 
 class DefaultController extends Controller
 {
@@ -10,17 +11,23 @@ class DefaultController extends Controller
     {
     	$message = \Swift_Message::newInstance()
 	        ->setSubject('Hello Email')
-	        ->setFrom('send@example.com')
-	        ->setTo('recipient@example.com')
-	        ->setBody(
-	            $this->renderView(
-	                // app/Resources/views/Emails/registration.html.twig
-	                'Emails/registration.html.twig',
-	                array('name' => $name)
-	            ),
-	            'text/html'
-	        );
+	        ->setFrom('hoarausamuel@gmail.com')
+	        ->setTo('hoarausamuel@gmail.com')
+	        ->setBody('hello world !!');
 	    $this->get('mailer')->send($message);
+
+	    $em = $this->getDoctrine()->getManager();
+
+	    $repository = $this
+		  ->getDoctrine()
+		  ->getManager()
+		  ->getRepository('MainBundle:Email');
+
+		$email = $repository->find(1);
+		$email->setCompteur($email->getCompteur()+1);
+		echo $email->getCompteur();
+
+	    $em->flush();
 
         return $this->render('MainBundle:Default:index.html.twig');
     }
