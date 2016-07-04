@@ -4,31 +4,51 @@ namespace MainBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use MainBundle\Entity\Email;
+use Symfony\Component\HttpFoundation\Request;
 
 class DefaultController extends Controller
 {
-    public function indexAction($name)
-    {
-    	$message = \Swift_Message::newInstance()
-	        ->setSubject('Hello Email')
-	        ->setFrom('hoarausamuel@gmail.com')
-	        ->setTo('hoarausamuel@gmail.com')
-	        ->setBody('hello world !!');
-	    $this->get('mailer')->send($message);
+    public function indexAction(Request $request, $name)
+    { 
+    	$compteur = "";
 
-	    $em = $this->getDoctrine()->getManager();
-
-	    $repository = $this
+    	$repository = $this
 		  ->getDoctrine()
 		  ->getManager()
 		  ->getRepository('MainBundle:Email');
 
 		$email = $repository->find(1);
-		$email->setCompteur($email->getCompteur()+1);
-		echo $email->getCompteur();
+		// verifie qu'il y a une entree sinon la creee
+		if(!$email) {
+			$compteur = 0;
+		} else {
+			$compteur = $email->getCompteur();
+		}
 
-	    $em->flush();
+    	// Quand on appuie sur le bouton envoyer
+    	if ($request->isMethod('POST')) {
+    		$message = \Swift_Message::newInstance()
+		        ->setSubject('Hello Email')
+		        ->setFrom('hoarausamuel@gmail.com')
+		        ->setTo('hoarausamuel@gmail.com')
+		        ->setBody('hello world !!');
+		    $this->get('mailer')->send($message);
 
-        return $this->render('MainBundle:Default:index.html.twig');
+		    $em = $this->getDoctrine()->getManager();
+
+		    if(!$email) {
+				$email = new Email();
+				$email->setCompteur(0);
+
+				$em->persist($email);
+			} else {
+				$email->setCompteur($email->getCompteur()+1);
+			}
+			$compteur = $email->getCompteur();
+
+		    $em->flush();
+    	}
+
+        return $this->render('MainBundle:Default:index.html.twig', array("compteur"=>$compteur));
     }
 }
