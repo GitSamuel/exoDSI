@@ -4,12 +4,8 @@
 </header>
 <body ng-app="exoDSI">
 	<div ng-controller="EmailController">
-		{{ compteur }}
-		<form action="/sam" method="post">
-			<input type="submit" value="Envoyer">
-		</form>
-		<input type="submit" value="Envoyer Angular" ng-click="test()">
-		<span ng-init="compteurAngular= {{ compteur }}">{[{compteurAngular}]}</span>
+		<input type="submit" value="Envoyer" ng-click="test()">
+		<span>{[{compteur}]}</span>
 	</div>
 
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
@@ -24,16 +20,36 @@
     });
 
 	app.controller('EmailController', ['$scope', '$http', function($scope, $http){
+		// Au chargement de la page on récupére le compteur
+		$http.get('/app_dev.php/getcompteur').then(
+			function(response){
+				$scope.compteur = response.data.compteur;
+			}, 
+			function(response){
+				console.log('error');
+				console.log(response);
+			}
+		);
+
+		// Action lorsque l'on clique sur envoyer
 		$scope.test = (function(){
-			$http.post('/sam').then(
+			$http.post('/app_dev.php').then(
 				function(response){
-					console.log('success');
+					$http.get('/app_dev.php/getcompteur').then(
+						function(response){
+							$scope.compteur = response.data.compteur;
+						}, 
+						function(response){
+							console.log('error');
+							console.log(response);
+						}
+					);
 				}, 
 				function(response){
 					console.log('error');
+					console.log(response);
 				}
 			);
-			$scope.compteurAngular = $scope.compteurAngular + 1;
 		});
 
 	}]);
