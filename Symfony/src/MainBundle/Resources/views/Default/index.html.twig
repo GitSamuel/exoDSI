@@ -8,14 +8,33 @@
 		<form action="/sam" method="post">
 			<input type="submit" value="Envoyer">
 		</form>
+		<input type="submit" value="Envoyer Angular" ng-click="test()">
+		<span ng-init="compteurAngular= {{ compteur }}">{[{compteurAngular}]}</span>
 	</div>
 
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
 	<script type="text/javascript">
 
 	var app = angular.module('exoDSI', []);
-	app.controller('EmailController', ['$scope', function($scope){
 
+	// gére le conflit entre twig et angularjs concernant les doubles accolades 
+	app.config(function($interpolateProvider) {
+	    $interpolateProvider.startSymbol('{[{');
+	    $interpolateProvider.endSymbol('}]}');
+    });
+
+	app.controller('EmailController', ['$scope', '$http', function($scope, $http){
+		$scope.test = (function(){
+			$http.post('/sam').then(
+				function(response){
+					console.log('success');
+				}, 
+				function(response){
+					console.log('error');
+				}
+			);
+			$scope.compteurAngular = $scope.compteurAngular + 1;
+		});
 
 	}]);
 
