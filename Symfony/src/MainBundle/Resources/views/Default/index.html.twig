@@ -1,15 +1,38 @@
 <html>
 <header>
 	<title>Email</title>
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/css/uikit.min.css" />
+
 </header>
 <body ng-app="exoDSI">
-	<div ng-controller="EmailController">
+	{# <div ng-controller="EmailController">
 		<input type="submit" value="Envoyer" ng-click="test()">
 		<span>{[{compteur}]}</span>
-	</div>
+	</div> #}
+
+	<div class="uk-vertical-align uk-text-center uk-height-1-1" ng-controller="EmailController">
+            <div class="uk-vertical-align-middle" style="width: 250px;">
+
+                <div class="uk-panel uk-panel-box uk-form">
+                    <p class="uk-row">
+                    	Ce message a été envoyé {[{compteur}]} fois.
+                    </p>
+                    <div class="uk-row">
+                    	<button id="sendButton" class="uk-width-1-1 uk-button uk-button-primary uk-button-large" type="button" ng-click="test()"><span ng-show="loading" class="uk-icon-spinner uk-icon-spin"></span>Envoyer</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
 
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+	<script   src="https://code.jquery.com/jquery-2.2.4.min.js"   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="   crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/js/uikit.min.js"></script>
+
 	<script type="text/javascript">
+
+	var sendButton = document.getElementById("sendButton");
 
 	var app = angular.module('exoDSI', []);
 
@@ -20,6 +43,8 @@
     });
 
 	app.controller('EmailController', ['$scope', '$http', function($scope, $http){
+		$scope.loading = false; // gére les chargements long
+
 		// Au chargement de la page on récupére le compteur
 		$http.get('/app_dev.php/getcompteur').then(
 			function(response){
@@ -33,21 +58,25 @@
 
 		// Action lorsque l'on clique sur envoyer
 		$scope.test = (function(){
+			$scope.loading = true;
+			sendButton.disabled = true;
+
 			$http.post('/app_dev.php').then(
 				function(response){
 					$http.get('/app_dev.php/getcompteur').then(
 						function(response){
 							$scope.compteur = response.data.compteur;
+
+							$scope.loading = false;
+							sendButton.disabled = false;
 						}, 
-						function(response){
+						function(){
 							console.log('error');
-							console.log(response);
 						}
 					);
 				}, 
-				function(response){
+				function(){
 					console.log('error');
-					console.log(response);
 				}
 			);
 		});
